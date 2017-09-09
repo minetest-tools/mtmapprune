@@ -116,9 +116,9 @@ func main() {
 		var y = unsigned_to_signed(pythonmodulo(pos, 4096), 2048)
 		pos = (pos - y) / 4096
 		var z = unsigned_to_signed(pythonmodulo(pos, 4096), 2048)
-		if (x * 16 > lx) || (x * 16 < -lx) ||
-		   (y * 16 > ly) || (y * 16 < -ly) ||
-		   (z * 16 > lz) || (z * 16 < -lz) {
+		if (x * 16 > lx) || (x * 16 + 15 < -lx) ||
+		   (y * 16 > ly) || (y * 16 + 15 < -ly) ||
+		   (z * 16 > lz) || (z * 16 + 15 < -lz) {
 			_, err = stmt.Exec(fmt.Sprintf("%v", opos))
 			if err != nil {
 				log.Fatal(err)
