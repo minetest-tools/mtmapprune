@@ -26,16 +26,30 @@ func pythonmodulo(i int64, mod int64) (int64) {
 func main() {
 	var ci, co int
 
-	if len(os.Args) != 3 {
-		log.Fatal("Not enough arguments: <sqlite file> <cutoff limit>")
+	if len(os.Args) < 3 {
+		log.Fatal("Not enough arguments: sqlite_file cutoff_limit_x [cutoff_limit_y] [cutoff_limit_z]")
 	}
 	f := os.Args[1]
-	l, err := strconv.ParseInt(os.Args[2], 0, 64)
+	lx, err := strconv.ParseInt(os.Args[2], 0, 64)
 	if err != nil {
 		log.Fatal(err)
 	}
-	if l < 0 {
-		log.Fatal("cutoff limit should be positive")
+	ly := lx
+	if len(os.Args) == 4 {
+		ly, err = strconv.ParseInt(os.Args[3], 0, 64)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	lz := lx
+	if len(os.Args) == 5 {
+		ly, err = strconv.ParseInt(os.Args[4], 0, 64)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	if lx < 0 || ly < 0 || lz < 0 {
+		log.Fatal("cutoff limits should be positive")
 	}
 
 	db, err := sql.Open("sqlite3", f)
@@ -78,7 +92,9 @@ func main() {
 		var y = unsigned_to_signed(pythonmodulo(pos, 4096), 2048)
 		pos = (pos - y) / 4096
 		var z = unsigned_to_signed(pythonmodulo(pos, 4096), 2048)
-		if (x * 16 > l) || (x * 16 < -l) || (z * 16 > l) || (z * 16 < -l) {
+		if (x * 16 > lx) || (x * 16 < -lx) ||
+		   (y * 16 > ly) || (y * 16 < -ly) ||
+		   (z * 16 > lz) || (z * 16 < -lz) {
 			_, err = stmt.Exec(fmt.Sprintf("%v", opos))
 			if err != nil {
 				log.Fatal(err)
@@ -93,7 +109,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("map.sqlite: removed %v of %v blocks\n", co, ci)
+	fmt.Printf("map.sqlite: removed %v of %v blocks (limits: %v, %v, %v)\n", co, ci, lx, ly, lz)
 
 	defer db.Close()
 }
