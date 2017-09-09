@@ -39,13 +39,6 @@ func unsigned_to_signed(i int64, max_positive int64) (int64) {
 	return (i - (max_positive * 2))
 }
 
-func pythonmodulo(i int64, mod int64) (int64) {
-	if i >= 0 {
-		return i % mod
-	}
-	return (mod - ((-i) % mod))
-}
-
 func main() {
 	var ci, co int
 
@@ -111,11 +104,11 @@ func main() {
 		var opos = pos
 
 		// From: minetest/src/database-sqlite3.cpp
-		var x = unsigned_to_signed(pythonmodulo(pos, 4096), 2048)
+		var x = unsigned_to_signed(pos & 0xfff, 2048)
 		pos = (pos - x) / 4096
-		var y = unsigned_to_signed(pythonmodulo(pos, 4096), 2048)
+		var y = unsigned_to_signed(pos & 0xfff, 2048)
 		pos = (pos - y) / 4096
-		var z = unsigned_to_signed(pythonmodulo(pos, 4096), 2048)
+		var z = unsigned_to_signed(pos & 0xfff, 2048)
 		if (x * 16 > lx) || (x * 16 + 15 < -lx) ||
 		   (y * 16 > ly) || (y * 16 + 15 < -ly) ||
 		   (z * 16 > lz) || (z * 16 + 15 < -lz) {
