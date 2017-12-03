@@ -17,5 +17,5 @@ If omitted, `y_limit` and `z_limit` default to the value of the
 Example: to prune all nodes with x and z > 1000, and x and z < -1000
 and y > 200, and y < 200, use:
 
-`mtmapprune map.sqlute 1000 200`
+`mtmapprune map.sqlite 1000 200`
 
