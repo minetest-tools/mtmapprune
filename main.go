@@ -39,33 +39,61 @@ func unsigned_to_signed(i int64, max_positive int64) (int64) {
 	return (i - (max_positive * 2))
 }
 
+func parse_arg(n int64) int64 {
+	v, err := strconv.ParseInt(os.Args[n], 0, 64)
+	if err != nil {
+		log.Fatal("Error parsing argument: ", n, ": ", err)
+	}
+	return v
+}
+
+type Limit struct {
+	min int64
+	max int64
+}
+
 func main() {
 	var ci, co int
 
 	if len(os.Args) < 3 {
-		log.Fatal("Not enough arguments: sqlite_file cutoff_limit_x [cutoff_limit_y] [cutoff_limit_z]")
+		log.Fatal("Not enough arguments: sqlite_file max_x [max_y [max_z [min_x min_y min_z]]]")
 	}
+	if len(os.Args) == 6 || len(os.Args) == 7 {
+		log.Fatal("Argument count must be 4 or 7, if you specify one min limit, you must specify them all")
+	}
+
 	f := os.Args[1]
-	lx, err := strconv.ParseInt(os.Args[2], 0, 64)
-	if err != nil {
-		log.Fatal(err)
-	}
-	ly := lx
-	if len(os.Args) == 4 {
-		ly, err = strconv.ParseInt(os.Args[3], 0, 64)
-		if err != nil {
-			log.Fatal(err)
+
+	var x Limit
+	var y Limit
+	var z Limit
+
+	x.max = parse_arg(2)
+	if len(os.Args) >= 3 {
+		y.max = parse_arg(3)
+		if len(os.Args) >= 4 {
+			z.max = parse_arg(4)
+		} else {
+			z.max = x.max
 		}
+	} else {
+		y.max = x.max
 	}
-	lz := lx
-	if len(os.Args) == 5 {
-		ly, err = strconv.ParseInt(os.Args[4], 0, 64)
-		if err != nil {
-			log.Fatal(err)
+
+	if len(os.Args) == 8 {
+		x.min = parse_arg(5)
+		y.min = parse_arg(6)
+		z.min = parse_arg(7)
+	} else {
+		if (x.max < 0) || (y.max < 0) || (z.max < 0) {
+			log.Fatal("Limits should be positive when passing max_x max_y max_z values")
 		}
-	}
-	if lx < 0 || ly < 0 || lz < 0 {
-		log.Fatal("cutoff limits should be positive")
+		x.min = -x.max
+		y.min = -y.max
+		z.min = -z.max
+		if (x.max <= x.min) || (y.max <= y.min) || (z.max <= z.min) {
+			log.Fatal("Limits should be max_x max_y max_z BEFORE min_x min_y min_z")
+		}
 	}
 
 	db, err := sql.Open("sqlite3", f)
@@ -104,14 +132,14 @@ func main() {
 		var opos = pos
 
 		// From: minetest/src/database-sqlite3.cpp
-		var x = unsigned_to_signed(pos & 0xfff, 2048)
-		pos = (pos - x) / 4096
-		var y = unsigned_to_signed(pos & 0xfff, 2048)
-		pos = (pos - y) / 4096
-		var z = unsigned_to_signed(pos & 0xfff, 2048)
-		if (x * 16 > lx) || (x * 16 + 15 < -lx) ||
-		   (y * 16 > ly) || (y * 16 + 15 < -ly) ||
-		   (z * 16 > lz) || (z * 16 + 15 < -lz) {
+		var xi = unsigned_to_signed(pos & 0xfff, 2048)
+		pos = (pos - xi) / 4096
+		var yi = unsigned_to_signed(pos & 0xfff, 2048)
+		pos = (pos - yi) / 4096
+		var zi = unsigned_to_signed(pos & 0xfff, 2048)
+		if (xi * 16 > x.max) || (xi * 16 + 15 < x.min) ||
+		   (yi * 16 > y.max) || (yi * 16 + 15 < y.min) ||
+		   (zi * 16 > z.max) || (zi * 16 + 15 < z.min) {
 			_, err = stmt.Exec(fmt.Sprintf("%v", opos))
 			if err != nil {
 				log.Fatal(err)
@@ -126,7 +154,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("map.sqlite: removed %v of %v blocks (limits: %v, %v, %v)\n", co, ci, lx, ly, lz)
+	fmt.Printf("map.sqlite: removed %v of %v blocks (limits: [%v, %v, %v]-[%v, %v, %v])\n",
+		co, ci, x.min, y.min, z.min, x.max, y.max, z.max)
 
 	defer db.Close()
 }

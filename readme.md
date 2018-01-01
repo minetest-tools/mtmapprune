@@ -9,10 +9,11 @@ some code from minetest verbatim to convert blockpos-nodepos.
 
 ## usage
 
-`mtmapprune map.sqlite x_limit [y_limit] [z_limit]`
+`mtmapprune map.sqlite max_x [max_y [max_z [min_x min_y min_z]]]`
 
-If omitted, `y_limit` and `z_limit` default to the value of the
-`x_limit`. The limits are node positions, not "block positions".
+If omitted, `max_y` and `max_z` default to the value of the `max_x`
+limit. The `min_*` limits will default to the negative values of the
+`max_*` limits. The limits are node positions, not "block positions".
 
 Example: to prune all nodes with x and z > 1000, and x and z < -1000
 and y > 200, and y < 200, use:
