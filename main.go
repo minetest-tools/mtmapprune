@@ -1,4 +1,3 @@
-
 //
 //    mtmapprune - Prune blocks outside a limit box in map.sqlite
 //
@@ -24,15 +23,15 @@ package main
 
 import (
 	"database/sql"
-	_ "github.com/mattn/go-sqlite3" // MIT licensed.
 	"fmt"
+	_ "github.com/mattn/go-sqlite3" // MIT licensed.
 	"log"
 	"os"
 	"strconv"
 )
 
 // From: minetest/src/database-sqlite3.cpp
-func unsigned_to_signed(i int64, max_positive int64) (int64) {
+func unsigned_to_signed(i int64, max_positive int64) int64 {
 	if i < max_positive {
 		return i
 	}
@@ -132,14 +131,14 @@ func main() {
 		var opos = pos
 
 		// From: minetest/src/database-sqlite3.cpp
-		var xi = unsigned_to_signed(pos & 0xfff, 2048)
+		var xi = unsigned_to_signed(pos&0xfff, 2048)
 		pos = (pos - xi) / 4096
-		var yi = unsigned_to_signed(pos & 0xfff, 2048)
+		var yi = unsigned_to_signed(pos&0xfff, 2048)
 		pos = (pos - yi) / 4096
-		var zi = unsigned_to_signed(pos & 0xfff, 2048)
-		if (xi * 16 > x.max) || (xi * 16 + 15 < x.min) ||
-		   (yi * 16 > y.max) || (yi * 16 + 15 < y.min) ||
-		   (zi * 16 > z.max) || (zi * 16 + 15 < z.min) {
+		var zi = unsigned_to_signed(pos&0xfff, 2048)
+		if (xi*16 > x.max) || (xi*16+15 < x.min) ||
+			(yi*16 > y.max) || (yi*16+15 < y.min) ||
+			(zi*16 > z.max) || (zi*16+15 < z.min) {
 			_, err = stmt.Exec(fmt.Sprintf("%v", opos))
 			if err != nil {
 				log.Fatal(err)
@@ -159,4 +158,3 @@ func main() {
 
 	defer db.Close()
 }
-
