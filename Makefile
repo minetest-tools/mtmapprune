@@ -4,7 +4,7 @@ PREFIX ?= /usr/local
 DIST := COPYING Makefile readme.md
 
 PROJECT := mtmapprune
-VERSION = 2
+VERSION = 3
 BUILD = `git describe --tags --always`
 
 $(PROJECT): main.go
