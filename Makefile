@@ -26,5 +26,10 @@ dist:
 	cp $(DIST) $(PROJECT)-$(BUILD)/
 	rm -f $(PROJECT)-$(BUILD)/$(PROJECT)
 	GOOS=linux GOARCH=amd64 go build -ldflags "-X main.Version=$(VERSION) -X main.Build=$(BUILD)" -o $(PROJECT) -o $(PROJECT)-$(BUILD)/$(PROJECT)
+	rm -f $(PROJECT)-$(BUILD)-x86_64.zip
 	zip -r $(PROJECT)-$(BUILD)-x86_64.zip $(PROJECT)-$(BUILD)/
+	rm -f $(PROJECT)-$(BUILD)/$(PROJECT)
+	CC=x86_64-w64-mingw32-gcc GOOS=windows GOARCH=amd64 CGO_ENABLED=1 go build -ldflags "-X main.Version=$(VERSION) -X main.Build=$(BUILD)" -o $(PROJECT) -o $(PROJECT)-$(BUILD)/$(PROJECT).exe
+	rm -f $(PROJECT)-$(BUILD)-win64.zip
+	zip -r $(PROJECT)-$(BUILD)-win64.zip $(PROJECT)-$(BUILD)/
 
