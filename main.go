@@ -114,6 +114,7 @@ func main() {
 		log.Fatal(err)
 	}
 
+	log.Println("Collecting blocks")
 	rows, err := db.Query("select pos from blocks")
 	if err != nil {
 		log.Fatal(err)
@@ -132,6 +133,7 @@ func main() {
 	}
 	rows.Close()
 
+	log.Println("Deleting blocks")
 	tx, err := db.Begin()
 	if err != nil {
 		log.Fatal(err)
@@ -162,12 +164,13 @@ func main() {
 	}
 	tx.Commit()
 
+	log.Println("Vaccuuming database")
 	_, err = db.Exec("VACUUM")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("map.sqlite: removed %v of %v blocks (limits: [%v, %v, %v]-[%v, %v, %v])\n",
+	log.Printf("Removed %v of %v blocks (limits: [%v, %v, %v]-[%v, %v, %v])\n",
 		co, ci, x.min, y.min, z.min, x.max, y.max, z.max)
 
 	defer db.Close()
