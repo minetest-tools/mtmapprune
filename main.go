@@ -90,9 +90,23 @@ func main() {
 		x.min = -x.max
 		y.min = -y.max
 		z.min = -z.max
-		if (x.max <= x.min) || (y.max <= y.min) || (z.max <= z.min) {
-			log.Fatal("Limits should be max_x max_y max_z BEFORE min_x min_y min_z")
-		}
+	}
+
+	// ensure proper ordering of min, max
+	if x.min > x.max {
+		a := x.min
+		x.min = x.max
+		x.max = a
+	}
+	if y.min > y.max {
+		a := y.min
+		y.min = y.max
+		y.max = a
+	}
+	if z.min > z.max {
+		a := z.min
+		z.min = z.max
+		z.max = a
 	}
 
 	db, err := sql.Open("sqlite3", f)
