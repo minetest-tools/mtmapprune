@@ -68,9 +68,9 @@ func main() {
 	var z Limit
 
 	x.max = parse_arg(2)
-	if len(os.Args) >= 3 {
+	if len(os.Args) > 3 {
 		y.max = parse_arg(3)
-		if len(os.Args) >= 4 {
+		if len(os.Args) > 4 {
 			z.max = parse_arg(4)
 		} else {
 			z.max = x.max
