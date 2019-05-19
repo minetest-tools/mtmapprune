@@ -77,6 +77,7 @@ func main() {
 		}
 	} else {
 		y.max = x.max
+		z.max = x.max
 	}
 
 	if len(os.Args) == 8 {
